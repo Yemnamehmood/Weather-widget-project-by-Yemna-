@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Widget</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to bottom, #c9d6ff, #e2e2e2);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .weather-widget {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
+            width: 350px;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 26px;
+            color: #444;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .search-box {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        #city-input {
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            width: 65%;
+            font-size: 16px;
+        }
+
+        #search-btn {
+            padding: 12px;
+            background-color: #00aaff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        #search-btn:hover {
+            background-color: #008ecc;
+        }
+
+        .weather-details {
+            margin-top: 20px;
+            display: none;
+        }
+
+        #city-name {
+            font-size: 22px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        #temperature {
+            font-size: 18px;
+            color: #ff6347;
+            font-weight: bold;
+        }
+
+        #weather-condition {
+            font-size: 16px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .weather-icon {
+            font-size: 60px;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            color: #00aaff;
+        }
+
+        /* Animations for background effects */
+        .snow {
+            background: url('https://i.ibb.co/KxCXTVK/snowflake.png') repeat;
+            animation: snowfall 10s linear infinite;
+        }
+
+        .rain {
+            background: url('https://i.ibb.co/vjKjWwz/rain.png') repeat;
+            animation: rainfall 10s linear infinite;
+        }
+
+        .fog {
+            background: url('https://i.ibb.co/qgzGCmq/fog.png') repeat;
+            animation: fogfall 10s linear infinite;
+        }
+
+        @keyframes snowfall {
+            0% {background-position: 0px 0px;}
+            100% {background-position: 0px 100vh;}
+        }
+
+        @keyframes rainfall {
+            0% {background-position: 0px 0px;}
+            100% {background-position: 0px 100vh;}
+        }
+
+        @keyframes fogfall {
+            0% {background-position: 0px 0px;}
+            100% {background-position: 0px 100vh;}
+        }
+    </style>
+</head>
+<body>
+    <div class="weather-widget" id="weather-widget">
+        <h2>Weather Widget</h2>
+        <div class="search-box">
+            <input type="text" id="city-input" placeholder="Enter city name">
+            <button id="search-btn">Search</button>
+        </div>
+        <div id="weather-details" class="weather-details">
+            <div class="weather-icon" id="weather-icon"></div>
+            <p id="city-name"></p>
+            <p id="temperature"></p>
+            <p id="weather-condition"></p>
+        </div>
+        <div> <footer style="text-align: center; margin-top: 20px; padding: 10px; font-size: 14px; color: #666;">
+            <p>&copy; 2024 Weather Widget by Yemna Mehmood. All rights reserved.</p>
+        </footer>
+        </div>
+    </div>
+
+    <script>
+        const apiKey = 'eb8e1c76ac0b4839b45203421241809'; // Replace with your WeatherAPI key
+        const apiUrl = 'https://api.weatherapi.com/v1/current.json?key=';
+
+        const searchBtn = document.getElementById('search-btn');
+        const cityInput = document.getElementById('city-input');
+        const cityName = document.getElementById('city-name');
+        const temperature = document.getElementById('temperature');
+        const weatherCondition = document.getElementById('weather-condition');
+        const weatherDetails = document.getElementById('weather-details');
+        const weatherWidget = document.getElementById('weather-widget');
+        const weatherIcon = document.getElementById('weather-icon');
+
+        searchBtn.addEventListener('click', async () => {
+            const city = cityInput.value.trim();
+            if (city) {
+                try {
+                    const response = await fetch(`${apiUrl}${apiKey}&q=${city}`);
+                    const data = await response.json();
+
+                    cityName.textContent = data.location.name;
+                    temperature.textContent = `Temperature: ${data.current.temp_c}°C`;
+                    weatherCondition.textContent = `Condition: ${data.current.condition.text}`;
+
+                    weatherDetails.style.display = 'block';
+
+                    // Set appropriate weather emoji and background effect
+                    const condition = data.current.condition.text.toLowerCase();
+                    if (condition.includes('rain')) {
+                        weatherIcon.textContent = '🌧️';
+                        weatherWidget.classList.add('rain');
+                    } else if (condition.includes('snow')) {
+                        weatherIcon.textContent = '❄️';
+                        weatherWidget.classList.add('snow');
+                    } else if (condition.includes('fog')) {
+                        weatherIcon.textContent = '🌫️';
+                        weatherWidget.classList.add('fog');
+                    } else if (condition.includes('clear') || condition.includes('sunny')) {
+                        weatherIcon.textContent = '☀️';
+                    } else {
+                        weatherIcon.textContent = '☁️';
+                    }
+
+                } catch (error) {
+                    alert('City not found! Please try again.');
+                    weatherDetails.style.display = 'none';
+                }
+            } else {
+                alert('Please enter a city name.');
+            }
+        });
+    </script>
+</body>
+</html>
